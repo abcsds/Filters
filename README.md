@@ -36,7 +36,7 @@ gain = `0`
 ### LCR (Bandpass)
 `((R/L)S)/(S**2+S(R/L)+(1/LC))`
 
-zeros = `[0]`
+zeros = `[0, float("inf")]`
 poles = `[((-1/L)-(1/L)*(C-4L))/2,((-1/L)+(1/L)*(C-4L))/2]`
 gain = `0`
 
