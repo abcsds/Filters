@@ -25,12 +25,17 @@ class Window(QtGui.QWidget):
         dropdown.addItem("Bandstop")
 
         inductorGroup = QtGui.QGroupBox("Inductor")
-        self.LLineEdit = QtGui.QLineEdit()
+        self.LLineEdit = QtGui.QInputDialog()
+        self.LLineEdit.setInputMode(QtGui.QInputDialog.DoubleInput)
         inductorLabel = QtGui.QLabel("Inductance:")
 
         capacitorGroup = QtGui.QGroupBox("Capacitor")
-        self.CLineEdit = QtGui.QLineEdit()
+        self.CLineEdit = QtGui.QInputDialog()
+        self.CLineEdit.setInputMode(QtGui.QInputDialog.DoubleInput)
         capacitorLabel = QtGui.QLabel("Capacitance:")
+
+        # Starting in Lowpass filter so, no capacitor
+        self.CLineEdit.setEnabled(False)
 
         dropdown.activated[int].connect(self.filterChanged)
 
@@ -44,11 +49,15 @@ class Window(QtGui.QWidget):
         CLayout.addWidget(self.CLineEdit,1)
         capacitorGroup.setLayout(CLayout)
 
+        self.circuitLabel = QtGui.QLabel(self)
+        self.circuit(0)
+
         menuLayout = QtGui.QVBoxLayout()
         menuLayout.addWidget(filterLabel, 0)
         menuLayout.addWidget(dropdown, 1)
         menuLayout.addWidget(inductorGroup, 2)
         menuLayout.addWidget(capacitorGroup, 3)
+        menuLayout.addWidget(self.circuitLabel, 4)
         menuGroup.setLayout(menuLayout)
 
         self.plot()
@@ -73,15 +82,27 @@ class Window(QtGui.QWidget):
         elif index == 3:
             self.LLineEdit.setEnabled(True)
             self.CLineEdit.setEnabled(True)
+        self.circuit(index)
 
     def plot(self):
-
         # generate the plot
         fig = Figure(figsize=(600,600), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
         ax = fig.add_subplot(111)
         ax.plot([0,1,3,2,2,3,4,2,1,2,3])
         # generate the canvas to display the plot
         self.canvas = FigureCanvas(fig)
+
+    def circuit(self,index):
+        if index == 0:
+            pixmap = QtGui.QPixmap("Lowpass.png")
+        elif index == 1:
+            pixmap = QtGui.QPixmap("Hipass.png")
+        elif index == 2:
+            pixmap = QtGui.QPixmap("Bandpass.png")
+        elif index == 3:
+            pixmap = QtGui.QPixmap("Bandstop.png")
+
+        self.circuitLabel.setPixmap(pixmap)
 
 
 if __name__ == '__main__':
