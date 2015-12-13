@@ -26,7 +26,7 @@ plt.semilogx (w, mag, color="blue", linewidth="1")
 
 plt.xlabel ("Frequency")
 plt.ylabel ("Magnitude")
-plt.savefig ("c:\\mag.png", dpi=300, format="png")
+# plt.savefig ("c:\\mag.png", dpi=300, format="png")
 
 plt.figure()
 

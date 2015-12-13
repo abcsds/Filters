@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import sys
+sys.settrace
 import matplotlib
 matplotlib.use('Qt4Agg')
 matplotlib.rcParams['backend.qt4']='PySide'
@@ -18,10 +19,10 @@ class Window(QtGui.QWidget):
     def __init__(self):
         super(Window, self).__init__()
         self.R = 1
-        self.L = 0
-        self.C = 0
+        self.L = 1
+        self.C = 1
 
-        self.sig = signal.lti([10], [50,200], 40)
+        self.sig = signal.lti([-1j,1j], [0], 1)
 
         menuGroup = QtGui.QGroupBox("Options")
 
@@ -36,12 +37,16 @@ class Window(QtGui.QWidget):
 
         inductorGroup = QtGui.QGroupBox("Inductor")
         self.LLineEdit = QtGui.QDoubleSpinBox()
-        self.LLineEdit.setMinimum(0)
+        self.LLineEdit.setDecimals(4)
+        self.LLineEdit.setValue(1)
+        self.LLineEdit.setMinimum(0.0001)
         inductorLabel = QtGui.QLabel("Inductance:")
 
         capacitorGroup = QtGui.QGroupBox("Capacitor")
         self.CLineEdit = QtGui.QDoubleSpinBox()
-        self.CLineEdit.setMinimum(0)
+        self.CLineEdit.setDecimals(4)
+        self.CLineEdit.setValue(1)
+        self.CLineEdit.setMinimum(0.0001)
         capacitorLabel = QtGui.QLabel("Capacitance:")
 
         # No capacitor in this lowpass
@@ -94,25 +99,24 @@ class Window(QtGui.QWidget):
         Self defined slot that gets called when the filter type changes
         '''
         self.filterType=index
-        # FIXME: hardcoded equations
         if index == 0:
             self.LLineEdit.setEnabled(True)
             self.CLineEdit.setEnabled(False)
-            self.sig = signal.lti([5], [50,200], 20)
+            self.sig = signal.lti([0.5], [0], 1)
         elif index == 1:
             self.LLineEdit.setEnabled(False)
             self.CLineEdit.setEnabled(True)
-            self.sig = signal.lti([20], [5,20], 600)
+            self.sig = signal.lti([0], [-1], 1)
         elif index == 2:
             self.LLineEdit.setEnabled(True)
             self.CLineEdit.setEnabled(True)
-            self.sig = signal.lti([2], [10,50], 30)
+            self.sig = signal.lti([0], [-1j,1j], 1)
         elif index == 3:
             self.LLineEdit.setEnabled(True)
             self.CLineEdit.setEnabled(True)
-            self.sig = signal.lti([10], [50,200], 40)
+            self.sig = signal.lti([-1j,1j], [0], 1)
         self.circuit()
-        # self.setFunction()
+        self.setFunction()
         self.plot()
 
 
@@ -122,20 +126,26 @@ class Window(QtGui.QWidget):
         '''
         if self.filterType == 0:
             # -R/L
-            self.sig = signal.lti([], [-1/self.L], 0)
+            self.sig = signal.lti(\
+            [-self.R/self.L], \
+            [0], \
+            1)
         elif self.filterType == 1:
             # -1/RC
-            self.sig = signal.lti([0], [-1/self.C], 0)
+            self.sig = signal.lti(\
+            [0], \
+            [-1/(self.C*self.R)], \
+            1)
         elif self.filterType == 2:
             self.sig = signal.lti(\
-            [0,float("inf")], \
+            [0], \
             [((-1/self.L)-(1/self.L)*(self.C-4*self.L))/2,((-1/self.L)+(1/self.L)*(self.C-4*self.L))/2], \
-            0)
+            1)
         elif self.filterType == 3:
             self.sig = signal.lti(\
             [(-1/self.L*self.C)**(1/2),-(-1/self.L*self.C)**(1/2)], \
             [((-1/self.L)-(1/self.L)*(self.C-4*self.L))/2,((-1/self.L)+(1/self.L)*(self.C-4*self.L))/2], \
-            40)
+            1)
 
     def indChanged(self, val):
         '''
@@ -162,7 +172,7 @@ class Window(QtGui.QWidget):
         self.graphPh.clear()
         self.graphMg.plot(w, mag)
         self.graphPh.plot(w, phase, 'r')
-        # FIXME: segfault on draw()
+        # FIXME: segfault on draw() under MacOSX
         # self.canvas.draw()
 
 
