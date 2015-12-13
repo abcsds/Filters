@@ -22,7 +22,7 @@ class Window(QtGui.QWidget):
         self.L = 1
         self.C = 1
 
-        self.sig = signal.lti([-1j,1j], [0], 1)
+        self.sig = signal.lti([0.5], [0], 1)
 
         menuGroup = QtGui.QGroupBox("Options")
 
