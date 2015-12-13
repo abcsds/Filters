@@ -3,7 +3,7 @@
 import sys
 import matplotlib
 matplotlib.use('Qt4Agg')
-# matplotlib.rcParams['backend.qt4']='PySide'
+matplotlib.rcParams['backend.qt4']='PySide'
 import pylab
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -73,6 +73,13 @@ class Window(QtGui.QWidget):
         menuLayout.addWidget(self.circuitLabel, 4)
         menuGroup.setLayout(menuLayout)
 
+        self.fig = Figure(figsize=(600,600), facecolor=(1,1,1), edgecolor=(0,0,0))
+        self.graphMg = self.fig.add_subplot(2,1,1,xscale='log')
+        self.graphPh = self.fig.add_subplot(2,1,2,xscale='log')
+        self.graphMg.set_title("Bode Diagram")
+        self.graphPh.set_title("Phase Diagram")
+        # generate the canvas to display the plot
+        self.canvas = FigureCanvas(self.fig)
         self.plot()
 
         layout = QtGui.QHBoxLayout()
@@ -87,20 +94,25 @@ class Window(QtGui.QWidget):
         Self defined slot that gets called when the filter type changes
         '''
         self.filterType=index
+        # FIXME: hardcoded equations
         if index == 0:
             self.LLineEdit.setEnabled(True)
             self.CLineEdit.setEnabled(False)
+            self.sig = signal.lti([5], [50,200], 20)
         elif index == 1:
             self.LLineEdit.setEnabled(False)
             self.CLineEdit.setEnabled(True)
+            self.sig = signal.lti([20], [5,20], 600)
         elif index == 2:
             self.LLineEdit.setEnabled(True)
             self.CLineEdit.setEnabled(True)
+            self.sig = signal.lti([2], [10,50], 30)
         elif index == 3:
             self.LLineEdit.setEnabled(True)
             self.CLineEdit.setEnabled(True)
+            self.sig = signal.lti([10], [50,200], 40)
         self.circuit()
-        self.setFunction()
+        # self.setFunction()
         self.plot()
 
 
@@ -145,14 +157,14 @@ class Window(QtGui.QWidget):
         '''
         Here goes the matplotlib magic: this function generates the Bode diagram
         '''
-        fig = Figure(figsize=(600,600), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
-        graph = fig.add_subplot(1,1,1,xscale="log")
-        # self.sig = signal.lti([10], [50,200], 40)
         w, mag, phase = signal.bode(self.sig)
-        graph.plot(w, mag)
+        self.graphMg.clear()
+        self.graphPh.clear()
+        self.graphMg.plot(w, mag)
+        self.graphPh.plot(w, phase, 'r')
+        # FIXME: segfault on draw()
+        # self.canvas.draw()
 
-        # generate the canvas to display the plot
-        self.canvas = FigureCanvas(fig)
 
     def circuit(self):
         '''
@@ -174,3 +186,4 @@ if __name__ == '__main__':
     window = Window()
     window.show()
     sys.exit(app.exec_())
+    del window
