@@ -40,6 +40,7 @@ class Window(QtGui.QWidget):
         self.LLineEdit.setDecimals(4)
         self.LLineEdit.setValue(1)
         self.LLineEdit.setMinimum(0.0001)
+        self.LLineEdit.setMaximum(100000)
         inductorLabel = QtGui.QLabel("Inductance:")
 
         capacitorGroup = QtGui.QGroupBox("Capacitor")
@@ -47,6 +48,7 @@ class Window(QtGui.QWidget):
         self.CLineEdit.setDecimals(4)
         self.CLineEdit.setValue(1)
         self.CLineEdit.setMinimum(0.0001)
+        self.CLineEdit.setMaximum(100000)
         capacitorLabel = QtGui.QLabel("Capacitance:")
 
         # No capacitor in this lowpass
@@ -115,9 +117,7 @@ class Window(QtGui.QWidget):
             self.LLineEdit.setEnabled(True)
             self.CLineEdit.setEnabled(True)
             self.sig = signal.lti([-1j,1j], [0], 1)
-        self.circuit()
-        self.setFunction()
-        self.plot()
+        self.updateWindow()
 
 
     def setFunction(self):
@@ -152,16 +152,14 @@ class Window(QtGui.QWidget):
         Self defined slot that gets called when the value of the inductor changes
         '''
         self.L = val
-        self.setFunction()
-        self.plot()
+        self.updateWindow()
 
     def capChanged(self, val):
         '''
         Self defined slot that gets called when the value of the capacitor changes
         '''
         self.C = val
-        self.setFunction()
-        self.plot()
+        self.updateWindow()
 
     def plot(self):
         '''
@@ -189,6 +187,15 @@ class Window(QtGui.QWidget):
         elif self.filterType == 3:
             pixmap = QtGui.QPixmap("Bandstop.png")
         self.circuitLabel.setPixmap(pixmap)
+
+    def updateWindow(self):
+        '''
+        Update the complete window
+        '''
+        self.circuit()
+        self.setFunction()
+        self.plot()
+        self.update()
 
 
 if __name__ == '__main__':
