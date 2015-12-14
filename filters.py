@@ -119,7 +119,6 @@ class Window(QtGui.QWidget):
             self.sig = signal.lti([-1j,1j], [0], 1)
         self.updateWindow()
 
-
     def setFunction(self):
         '''
         Set bode function from transfer function
@@ -172,7 +171,6 @@ class Window(QtGui.QWidget):
         self.graphPh.plot(w, phase, 'r')
         # FIXME: segfault on draw() under MacOSX
         # self.canvas.draw()
-
 
     def circuit(self):
         '''
